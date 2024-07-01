@@ -124,6 +124,7 @@ void loop() {
 
     int16_t adc0, adc1, adc2, adc3, adc4, adc5, adc6, adc7, adc8;
     float U5_AIN0, U5_AIN1, U5_AIN2, U5_AIN3, U6_AIN0, U6_AIN1, U6_AIN2, U6_AIN3;
+    float DUT_R1, DUT_R2, DUT_R3, DUT_R4, DUT_R5, DUT_R6; // Calculated value of the resistors under test
     char input_voltage_string[10];
     char test_voltage_string[10];
     char R1_voltage_string[10];
@@ -132,6 +133,7 @@ void loop() {
     char R4_voltage_string[10];
     char R5_voltage_string[10];
     char R6_voltage_string[10];
+
 
     // Measure Temperature and report
     // For some reason, the first reading is always excessively high.
@@ -174,33 +176,43 @@ void loop() {
     M5.Lcd.drawString(input_voltage_string, 160, 121);
     M5.Lcd.drawString(temperature_string, 160, 154);
 
-    // Measure R4 / 174K or 125K
+    // Measure R4 / Should be 174K or 125K.  Test (top) resistor is 174K
     adc3 = ads.readADC_SingleEnded(3); // U5_AIN3 - DUT_R4
     U5_AIN3 = ads.computeVolts(adc3); // U5_AIN3 - DUT_R4
+    DUT_R4 = ((U5_AIN0 * 174000 ) / (U5_AIN0 - U5_AIN3));
 
-    // Determine if this is 6K (174K) or 8K (125K)
-
-    // Measure R1 / 95K -ish  Adjustable
+    // Measure R1 / 95K -ish  Adjustable - Test resistor is 100K
     adc6 = ads2.readADC_SingleEnded(2); // U6_AIN2 - DUT_R1
     U6_AIN2 = ads2.computeVolts(adc6); // U6_AIN2 - DUT_R1
+    DUT_R1 = ((U5_AIN0 * 100000 ) / (U5_AIN0 - U6_AIN2));
+
+    // Determine if this is 6K (174K) or 8K (125K).
+    // This will tell us what value to set R1 to 
+    // If U6_AIN2 is close to 0.5* U5_AIN0, it's a 6K. 
+    // If U6_AIN2 is close to 0.41666667
 
     // Measure R2 / 4.02K
     adc4 = ads2.readADC_SingleEnded(0); // U6_AIN0 - DUT R2
     U6_AIN0 = ads2.computeVolts(adc4); // U6_AIN0 - DUT R2
+    DUT_R2 = ((U5_AIN0 * 4020 ) / (U5_AIN0 - U6_AIN0));
 
     // Measure R3 / 2K
     adc5 = ads2.readADC_SingleEnded(1); // U6_AIN1 - DUT_R3
     U6_AIN1 = ads2.computeVolts(adc5); // U6_AIN1 - DUT_R3
+    DUT_R3 = ((U5_AIN0 * 2000 ) / (U5_AIN0 - U6_AIN1));
 
     // Measure R5 / 4.53K
     adc7 = ads2.readADC_SingleEnded(3); // U6_AIN3 - DUT_R5
     U6_AIN3 = ads2.computeVolts(adc7); // U6_AIN3 - DUT_R5
+    DUT_R5 = ((U5_AIN0 * 4530 ) / (U5_AIN0 - U6_AIN3));
 
     // Measure R6 / 3K
     adc1 = ads.readADC_SingleEnded(1); // U5_AIN1 - DUT_R6
     U5_AIN1 = ads.computeVolts(adc1); // U5_AIN1 - DUT_R6
+    DUT_R6 = ((U5_AIN0 * 100000 ) / (U5_AIN0 - U5_AIN1));
 
-    // Calculate resistances and report pass/fail results and CCW/CW results on R1
+    // Report pass/fail results and CCW/CW results
+
     
 
     // Wait for screen to clear, then Clear Screen and loop
@@ -210,4 +222,3 @@ void loop() {
 
   }
 }
-

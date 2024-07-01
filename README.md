@@ -47,3 +47,12 @@ This is provided from a switching power supply formed by a TPS5420DR IC U2.
 ### 5V0 Test Voltage
 
 This is created by a RECOM R78E5.0-1.0 Module U1.  
+
+## Resistance Calculations
+
+* Need to measure Test Voltage (Vtest in volts)
+* Need to measure DUT voltage for the resistor under test (Vmeas in volts)
+* Need to know what the divider reisistor is (Rtop)
+* Rbottom is the resistor under test
+* Rbottom = (Vmeas * Rtop) / (Vtest - Vmeas)
+
