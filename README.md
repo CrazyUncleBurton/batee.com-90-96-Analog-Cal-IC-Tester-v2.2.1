@@ -13,11 +13,11 @@ This is the production repository for the 90-96 Analog Cal IC Tester v2.2.1.  It
 
 ## M5Stack Core2 AWS I/O
 
-G19 - RELAY1_CONTROL
+G19 - RELAY1_CONTROL (Resistors R2 and R3)
 G21 - Internal I2C BUS SDA
 G22 - Internal I2C BUS SCL
-G25 - RELAY3_CONTROL
-G26 - RELAY2_CONTROL
+G25 - RELAY3_CONTROL (Resistors R4 and R6)
+G26 - RELAY2_CONTROL (Resistors R1 and R5)
 
 ## I2C Addresses
 
