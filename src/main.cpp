@@ -137,11 +137,9 @@ void loop() {
     float temperature = 74;
     char temperature_string[10];
 
-
     // Measure Temperature and report
     // For some reason, the first reading is always excessively high.
     // Read the temperature twice to work around this problem.
-
     temperature = get_temperature();
     if (temperature > 100) 
     {
@@ -159,8 +157,7 @@ void loop() {
     U5_AIN0 = ads.computeVolts(adc0); // U5_AIN0 - 5V0 Test Voltage
     VTEST = U5_AIN0 * 2.000;
 
-    // Report Test Conditions
-    // format readings
+    // Report Test Conditions and format readings
     sprintf(temperature_string,"%2.1fF\n",temperature);
     sprintf(input_voltage_string,"%2.1f\n",VIN); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
     sprintf(test_voltage_string,"%2.1f\n",VTEST); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
@@ -176,11 +173,6 @@ void loop() {
     M5.Lcd.print("V  Temp: ");
     M5.Lcd.print(temperature_string);
     M5.Lcd.println("degF");
-
-    M5.Lcd.setFreeFont(FSB18);
-    M5.Lcd.drawString(input_voltage_string, 160, 88);
-    M5.Lcd.drawString(input_voltage_string, 160, 121);
-    M5.Lcd.drawString(temperature_string, 160, 154);
 
     // Measure R4 / Should be 174K or 125K.  Test (top) resistor is 174K
     adc3 = ads.readADC_SingleEnded(3); // U5_AIN3 - DUT_R4
@@ -217,11 +209,9 @@ void loop() {
     // If U6_AIN2 is close to 0.5* U5_AIN0, it's a 6K. 
     // If U6_AIN2 is close to 0.41666667
 
-
     // Report pass/fail results and CCW/CW results
 
     
-
     // Wait for screen to clear, then Clear Screen and loop
     delay(50); // We can't loop more than 128 samples per second (maybe 32 x 4 channels per ADC = 31.25mS)
     M5.Lcd.clear();   // Clear the contents displayed on the screen
