@@ -125,6 +125,7 @@ void loop() {
     int16_t adc0, adc1, adc2, adc3, adc4, adc5, adc6, adc7, adc8;
     float U5_AIN0, U5_AIN1, U5_AIN2, U5_AIN3, U6_AIN0, U6_AIN1, U6_AIN2, U6_AIN3;
     float DUT_R1, DUT_R2, DUT_R3, DUT_R4, DUT_R5, DUT_R6; // Calculated value of the resistors under test
+    float VIN, VTEST; // Calculated values of measured voltages with voltage dividers factored in
     char input_voltage_string[10];
     char test_voltage_string[10];
     char R1_voltage_string[10];
@@ -133,13 +134,14 @@ void loop() {
     char R4_voltage_string[10];
     char R5_voltage_string[10];
     char R6_voltage_string[10];
+    float temperature = 74;
+    char temperature_string[10];
 
 
     // Measure Temperature and report
     // For some reason, the first reading is always excessively high.
     // Read the temperature twice to work around this problem.
-    char temperature_string[10];
-    float temperature = 74;
+
     temperature = get_temperature();
     if (temperature > 100) 
     {
@@ -149,15 +151,19 @@ void loop() {
     // Measure 15V0 Input Voltage
     adc2 = ads.readADC_SingleEnded(2); // U5_AIN2 - 15V0 Power In Voltage
     U5_AIN2 = ads.computeVolts(adc2); // U5_AIN2 - 15V0 Power In Voltage
+    // U5_AIN2 is the measured voltage.  We need to multiply by the voltage divider to recover the actual voltage
+    VIN = U5_AIN2 * 6.000;
 
     // Measure 5V0 Test Voltage
     adc0 = ads.readADC_SingleEnded(0); // U5_AIN0 - 5V0 Test Voltage
     U5_AIN0 = ads.computeVolts(adc0); // U5_AIN0 - 5V0 Test Voltage
+    VTEST = U5_AIN0 * 2.000;
 
     // Report Test Conditions
+    // format readings
     sprintf(temperature_string,"%2.1fF\n",temperature);
-    sprintf(input_voltage_string,"%2.1fVolts\n",U5_AIN2); // If I put the space here I want, the unit reboots right after printing this --CUB
-    sprintf(test_voltage_string,"%2.1fVolts\n",U5_AIN0); // If I put the space here I want, the unit reboots right after printing this --CUB
+    sprintf(input_voltage_string,"%2.1f\n",VIN); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
+    sprintf(test_voltage_string,"%2.1f\n",VTEST); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
     M5.Lcd.clear();   // Clear the contents displayed on the screen
     M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
     M5.Lcd.setFreeFont(FSB9);      // Select Free Serif 9 point font
@@ -179,37 +185,38 @@ void loop() {
     // Measure R4 / Should be 174K or 125K.  Test (top) resistor is 174K
     adc3 = ads.readADC_SingleEnded(3); // U5_AIN3 - DUT_R4
     U5_AIN3 = ads.computeVolts(adc3); // U5_AIN3 - DUT_R4
-    DUT_R4 = ((U5_AIN0 * 174000 ) / (U5_AIN0 - U5_AIN3));
+    DUT_R4 = ((U5_AIN0 * 174.00 ) / (U5_AIN0 - U5_AIN3)); // in kOhms
 
     // Measure R1 / 95K -ish  Adjustable - Test resistor is 100K
     adc6 = ads2.readADC_SingleEnded(2); // U6_AIN2 - DUT_R1
     U6_AIN2 = ads2.computeVolts(adc6); // U6_AIN2 - DUT_R1
-    DUT_R1 = ((U5_AIN0 * 100000 ) / (U5_AIN0 - U6_AIN2));
+    DUT_R1 = ((U5_AIN0 * 100.00 ) / (U5_AIN0 - U6_AIN2)); // in kOhms
+
+    // Measure R2 / 4.02K
+    adc4 = ads2.readADC_SingleEnded(0); // U6_AIN0 - DUT R2
+    U6_AIN0 = ads2.computeVolts(adc4); // U6_AIN0 - DUT R2
+    DUT_R2 = ((U5_AIN0 * 4.02 ) / (U5_AIN0 - U6_AIN0)); // in kOhms
+
+    // Measure R3 / 2K
+    adc5 = ads2.readADC_SingleEnded(1); // U6_AIN1 - DUT_R3
+    U6_AIN1 = ads2.computeVolts(adc5); // U6_AIN1 - DUT_R3
+    DUT_R3 = ((U5_AIN0 * 2.00 ) / (U5_AIN0 - U6_AIN1)); // in kOhms
+
+    // Measure R5 / 4.53K
+    adc7 = ads2.readADC_SingleEnded(3); // U6_AIN3 - DUT_R5
+    U6_AIN3 = ads2.computeVolts(adc7); // U6_AIN3 - DUT_R5
+    DUT_R5 = ((U5_AIN0 * 4.53 ) / (U5_AIN0 - U6_AIN3)); // in kOhms
+
+    // Measure R6 / 3K
+    adc1 = ads.readADC_SingleEnded(1); // U5_AIN1 - DUT_R6
+    U5_AIN1 = ads.computeVolts(adc1); // U5_AIN1 - DUT_R6
+    DUT_R6 = ((U5_AIN0 * 3.00 ) / (U5_AIN0 - U5_AIN1)); // in kOhms
 
     // Determine if this is 6K (174K) or 8K (125K).
     // This will tell us what value to set R1 to 
     // If U6_AIN2 is close to 0.5* U5_AIN0, it's a 6K. 
     // If U6_AIN2 is close to 0.41666667
 
-    // Measure R2 / 4.02K
-    adc4 = ads2.readADC_SingleEnded(0); // U6_AIN0 - DUT R2
-    U6_AIN0 = ads2.computeVolts(adc4); // U6_AIN0 - DUT R2
-    DUT_R2 = ((U5_AIN0 * 4020 ) / (U5_AIN0 - U6_AIN0));
-
-    // Measure R3 / 2K
-    adc5 = ads2.readADC_SingleEnded(1); // U6_AIN1 - DUT_R3
-    U6_AIN1 = ads2.computeVolts(adc5); // U6_AIN1 - DUT_R3
-    DUT_R3 = ((U5_AIN0 * 2000 ) / (U5_AIN0 - U6_AIN1));
-
-    // Measure R5 / 4.53K
-    adc7 = ads2.readADC_SingleEnded(3); // U6_AIN3 - DUT_R5
-    U6_AIN3 = ads2.computeVolts(adc7); // U6_AIN3 - DUT_R5
-    DUT_R5 = ((U5_AIN0 * 4530 ) / (U5_AIN0 - U6_AIN3));
-
-    // Measure R6 / 3K
-    adc1 = ads.readADC_SingleEnded(1); // U5_AIN1 - DUT_R6
-    U5_AIN1 = ads.computeVolts(adc1); // U5_AIN1 - DUT_R6
-    DUT_R6 = ((U5_AIN0 * 100000 ) / (U5_AIN0 - U5_AIN1));
 
     // Report pass/fail results and CCW/CW results
 
