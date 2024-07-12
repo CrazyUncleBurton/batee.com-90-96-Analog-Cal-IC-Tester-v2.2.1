@@ -2,7 +2,7 @@
 
 Bryan A. "CrazyUncleBurton" Thompson
 
- Last Updated 6/30/2024
+ Last Updated 7/12/2024
 
 Github Repository:  batee.com-90-96-Analog-Cal-IC-Tester-v2.2.1
 <https://github.com/CrazyUncleBurton/batee.com-90-96-Analog-Cal-IC-Tester-v2.2.1>
@@ -21,9 +21,18 @@ G26 - RELAY2_CONTROL (Resistors R1 and R5)
 
 ## I2C Addresses
 
-U5 - ADS1115 ADC:  0x48
-U6 - ADS1115 ADC:  0x4A
-U10 - MCP9802-5T Temp Sender:  0x4D
+In the M5Stack Core2 AWS on the internal I2C Bus:
+AXP192 Power Controller IC:   0x34
+ATECC608B Crypto Chip:        0x35 (in the bottom grey base not present in the tester)
+FT6336U Capacitive Touch IC:  0x38
+BM8563 RTC:                   0x51
+MPU6886 6 axis accel / gyro:  0x68 (in the bottom grey base not present in the tester)
+Note the grey bottom base is removed from the Stack and not used in the 90-96 Analog Cal IC Tester.
+
+On the purple 90-96 Analog Cal IC Tester Board on the Internal I2C Bus:
+U5 - ADS1115 ADC:             0x48
+U6 - ADS1115 ADC:             0x4A
+U10 - MCP9802-5T Temp Sender: 0x4D
 
 ## ADC Inputs
 
@@ -55,4 +64,3 @@ This is created by a RECOM R78E5.0-1.0 Module U1.
 * Need to know what the divider reisistor is (Rtop)
 * Rbottom is the resistor under test
 * Rbottom = (Vmeas * Rtop) / (Vtest - Vmeas)
-
