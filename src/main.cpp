@@ -4,7 +4,7 @@
 
   by Bryan A. "CrazyUncleBurton" Thompson
 
-  Last Updated 06/30/2024
+  Last Updated 07/12/2024
 
 */
 
@@ -66,7 +66,6 @@ float get_temperature()
 
 
 // Setup Runs Once
-
 void setup() {
   
   // M5.begin Line from SodaSaver:  M5.begin(true,true,false,false,kMBusModeInput); //Init M5Core2- bool LCDEnable = true, bool SDEnable = true, bool SerialEnable = false, bool I2CEnable = false, AXP192 power mode OUTPUT to power ext hardwre
@@ -82,29 +81,41 @@ void setup() {
   // Enable Internal I2C
   Wire.begin(21, 22); //Everything is on the M5Stack Internal I2C Bus
   delay(1000);
-  Wire.setClock(400000UL); // 400kHz Internal Bus Speed
+  Wire.setClock(100000UL); // 400kHz Internal Bus Speed
 
   // Begin U5 ADC
-  ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  // ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV      0.1875mV (default)
+  ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
+  // ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
+  // ads.setGain(GAIN_FOUR);       // 4x gain   +/- 1.024V  1 bit = 0.5mV    0.03125mV
+  // ads.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
+  // ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
   if (!ads.begin(ADS1115_U5)) {
     Serial.println("Failed to initialize U5 ADC.");
     while (1); // Halt and Catch Fire
   }
 
   // Begin U6 ADC
-  ads2.setGain(GAIN_SIXTEEN);  // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-  if (!ads.begin(ADS1115_U6)) {
+  // ads2.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV      0.1875mV (default)
+  ads2.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
+  // ads2.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
+  // ads2.setGain(GAIN_FOUR);       // 4x gain   +/- 1.024V  1 bit = 0.5mV    0.03125mV
+  // ads2.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
+  // ads2.setGain(GAIN_SIXTEEN);  // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+  if (!ads2.begin(ADS1115_U6)) {
     Serial.println("Failed to initialize U6 ADC.");
     while (1); // Halt and Catch Fire
   }
 
   // Print the header for a display screen
-  M5.Lcd.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-  M5.Lcd.setFreeFont(FSB9);      // Select Free Serif 9 point font
+  M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+  M5.Lcd.setFreeFont(FSB12);      // Select Free Serif 9 point font
   M5.Lcd.setTextDatum(MC_DATUM); // cursor is top left of text - not sure if this works with print
   M5.Lcd.setCursor(0, 30);       // Set initial position - might not be needed withdrawString? 
-  M5.Lcd.drawString("batee.com Analog Cal IC Tester", 0, 30);
-  M5.Lcd.drawString("Hardware: v2.2.1 Firmware v1.0.0", 0, 63);
+  M5.Lcd.drawString("batee.com", 120 , 30);
+  M5.Lcd.drawString("Analog Cal IC Tester",120, 63);
+  M5.Lcd.drawString("Hardware: v2.2.1", 120, 96);
+  M5.Lcd.drawString("Firmware v1.0.0", 120, 129);
 
   // Enable All Relays
   digitalWrite (RELAY1_CONTROL, HIGH); // Turn On Relay1 / Resistors R2 and R3
@@ -126,16 +137,72 @@ void loop() {
     float U5_AIN0, U5_AIN1, U5_AIN2, U5_AIN3, U6_AIN0, U6_AIN1, U6_AIN2, U6_AIN3;
     float DUT_R1, DUT_R2, DUT_R3, DUT_R4, DUT_R5, DUT_R6; // Calculated value of the resistors under test
     float VIN, VTEST; // Calculated values of measured voltages with voltage dividers factored in
-    char input_voltage_string[10];
-    char test_voltage_string[10];
-    char R1_voltage_string[10];
-    char R2_voltage_string[10];
-    char R3_voltage_string[10];
-    char R4_voltage_string[10];
-    char R5_voltage_string[10];
-    char R6_voltage_string[10];
+    char input_voltage_string[16];
+    char test_voltage_string[16];
+    char R1_voltage_string[16];
+    char R2_voltage_string[16];
+    char R3_voltage_string[16];
+    char R4_voltage_string[16];
+    char R5_voltage_string[16];
+    char R6_voltage_string[16];
+    char R1_resistance_string[16];
+    char R2_resistance_string[16];
+    char R3_resistance_string[16];
+    char R4_resistance_string[16];
+    char R5_resistance_string[16];
+    char R6_resistance_string[16];
     float temperature = 74;
-    char temperature_string[10];
+    char temperature_string[16];
+    float R1_test_resistor = 96.000; // in kOhms as measured from ground to the DUT Socket pin 10
+    float R2_test_resistor = 4.017; // in kOhms as measured from ground to the DUT Socket pin 13
+    float R3_test_resistor = 2.001; // in kOhms as measured from ground to the DUT Socket pin 11
+    float R4_test_resistor = 174.200; // in kOhms as measured from ground to the DUT Socket pin 0
+    float R5_test_resistor = 4.518; // in kOhms as measured from ground to the DUT Socket pin 4
+    float R6_test_resistor = 3.001; // in kOhms as measured from ground to the DUT Socket pin 7
+
+    // Measure 15V0 Input Voltage
+    adc2 = ads.readADC_SingleEnded(2); // U5_AIN2 - 15V0 Power In Voltage
+    U5_AIN2 = ads.computeVolts(adc2); // U5_AIN2 - 15V0 Power In Voltage
+    // U5_AIN2 is the measured voltage.  We need to multiply by the voltage divider to recover the actual voltage
+    VIN = U5_AIN2 * 6.00235386;
+
+    // Measure 5V0 Test Voltage
+    adc0 = ads.readADC_SingleEnded(0); // U5_AIN0 - 5V0 Test Voltage
+    U5_AIN0 = ads.computeVolts(adc0); // U5_AIN0 - 5V0 Test Voltage
+    VTEST = U5_AIN0 * 2.0011928;
+
+    // Measure R1
+    adc6 = ads2.readADC_SingleEnded(2); // U6_AIN2 - DUT_R1
+    U6_AIN2 = ads2.computeVolts(adc6); // U6_AIN2 - DUT_R1
+    DUT_R1 = ((U6_AIN2 * R1_test_resistor ) / (VTEST - U6_AIN2)); // in kOhms
+
+    // Measure R2
+    adc4 = ads2.readADC_SingleEnded(0); // U6_AIN0 - DUT_R2
+    U6_AIN0 = ads2.computeVolts(adc4); // U6_AIN0 - DUT_R2
+    DUT_R2 = ((U6_AIN0 * R2_test_resistor ) / (VTEST - U6_AIN0)); // in kOhms
+
+    // Measure R3
+    adc5 = ads2.readADC_SingleEnded(1); // U6_AIN1 - DUT_R3
+    U6_AIN1 = ads2.computeVolts(adc5); // U6_AIN1 - DUT_R3
+    DUT_R3 = ((U6_AIN1 * R3_test_resistor ) / (VTEST - U6_AIN1)); // in kOhms
+
+    // Measure R4
+    adc3 = ads.readADC_SingleEnded(3); // U5_AIN3 - DUT_R4
+    U5_AIN3 = ads.computeVolts(adc3); // U5_AIN3 - DUT_R4
+    DUT_R4 = ((U5_AIN3 * R4_test_resistor ) / (VTEST - U5_AIN3)); // in kOhms
+
+    // Measure R5
+    adc7 = ads2.readADC_SingleEnded(3); // U6_AIN3 - DUT_R5
+    U6_AIN3 = ads2.computeVolts(adc7); // U6_AIN3 - DUT_R5
+    DUT_R5 = ((U6_AIN3 * R5_test_resistor ) / (VTEST - U6_AIN3)); // in kOhms
+
+    // Measure R6
+    adc1 = ads.readADC_SingleEnded(1); // U5_AIN1 - DUT_R6
+    U5_AIN1 = ads.computeVolts(adc3); // U5_AIN1 - DUT_R6
+    DUT_R6 = ((U5_AIN1 * R6_test_resistor ) / (VTEST - U5_AIN1)); // in kOhms.  
+    
+
+    // Report Results
 
     // Measure Temperature and report
     // For some reason, the first reading is always excessively high.
@@ -146,76 +213,116 @@ void loop() {
       temperature = get_temperature();
     }
 
-    // Measure 15V0 Input Voltage
-    adc2 = ads.readADC_SingleEnded(2); // U5_AIN2 - 15V0 Power In Voltage
-    U5_AIN2 = ads.computeVolts(adc2); // U5_AIN2 - 15V0 Power In Voltage
-    // U5_AIN2 is the measured voltage.  We need to multiply by the voltage divider to recover the actual voltage
-    VIN = U5_AIN2 * 6.000;
-
-    // Measure 5V0 Test Voltage
-    adc0 = ads.readADC_SingleEnded(0); // U5_AIN0 - 5V0 Test Voltage
-    U5_AIN0 = ads.computeVolts(adc0); // U5_AIN0 - 5V0 Test Voltage
-    VTEST = U5_AIN0 * 2.000;
-
     // Report Test Conditions and format readings
-    sprintf(temperature_string,"%2.1fF\n",temperature);
-    sprintf(input_voltage_string,"%2.1f\n",VIN); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
-    sprintf(test_voltage_string,"%2.1f\n",VTEST); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
+    sprintf(temperature_string,"%2.1fF",temperature);
+    sprintf(input_voltage_string,"%2.3f V",VIN); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
+    sprintf(test_voltage_string,"%1.3f V",VTEST); // If I put the space here I want, the unit reboots right after printing this due to a buffer overflow --CUB
+    
     M5.Lcd.clear();   // Clear the contents displayed on the screen
     M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
     M5.Lcd.setFreeFont(FSB9);      // Select Free Serif 9 point font
     M5.Lcd.setTextDatum(MC_DATUM); // cursor is top left of text - not sure if this works with print
     M5.Lcd.setCursor(0, 30);
     M5.Lcd.print("Vin: ");
-    M5.Lcd.print(input_voltage_string);
-    M5.Lcd.print("V  Vtest: ");
-    M5.Lcd.print(test_voltage_string);
-    M5.Lcd.print("V  Temp: ");
-    M5.Lcd.print(temperature_string);
-    M5.Lcd.println("degF");
+    M5.Lcd.println(input_voltage_string);
+     M5.Lcd.print("Vtest: ");
+    M5.Lcd.println(test_voltage_string);
+    M5.Lcd.print("Temp: ");
+    M5.Lcd.println(temperature_string);
 
-    // Measure R4 / Should be 174K or 125K.  Test (top) resistor is 174K
-    adc3 = ads.readADC_SingleEnded(3); // U5_AIN3 - DUT_R4
-    U5_AIN3 = ads.computeVolts(adc3); // U5_AIN3 - DUT_R4
-    DUT_R4 = ((U5_AIN0 * 174.00 ) / (U5_AIN0 - U5_AIN3)); // in kOhms
+    // R1
+    // It doesn't matter which model this is.  R1 needs to be set to 96k.  
+    // Change the 100k resistor R1 to 96k on the board
+    if (abs((DUT_R1 - R1_test_resistor)/R1_test_resistor) < 0.01 ) 
+    {
+      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    } else {
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    } 
+    M5.Lcd.print("R1 = ");
+    M5.Lcd.print(DUT_R1);
+    M5.Lcd.print("k");
+    M5.Lcd.print("  Target = ");
+    M5.Lcd.print(R1_test_resistor);
+    M5.Lcd.println("k");
 
-    // Measure R1 / 95K -ish  Adjustable - Test resistor is 100K
-    adc6 = ads2.readADC_SingleEnded(2); // U6_AIN2 - DUT_R1
-    U6_AIN2 = ads2.computeVolts(adc6); // U6_AIN2 - DUT_R1
-    DUT_R1 = ((U5_AIN0 * 100.00 ) / (U5_AIN0 - U6_AIN2)); // in kOhms
+    // R2
+    if (abs((DUT_R2 - R2_test_resistor)/R2_test_resistor) < 0.01 ) 
+    {
+      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    } else {
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    }
+    M5.Lcd.print("R2 = ");
+    M5.Lcd.print(DUT_R2);
+    M5.Lcd.print("k");
+    M5.Lcd.print("  Target = ");
+    M5.Lcd.print(R2_test_resistor);
+    M5.Lcd.println("k");
 
-    // Measure R2 / 4.02K
-    adc4 = ads2.readADC_SingleEnded(0); // U6_AIN0 - DUT R2
-    U6_AIN0 = ads2.computeVolts(adc4); // U6_AIN0 - DUT R2
-    DUT_R2 = ((U5_AIN0 * 4.02 ) / (U5_AIN0 - U6_AIN0)); // in kOhms
+    // R3
+    if (abs((DUT_R3 - R3_test_resistor)/R3_test_resistor) < 0.01 ) 
+    {
+      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    } else {
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    }
+    M5.Lcd.print("R3 = ");
+    M5.Lcd.print(DUT_R3);
+    M5.Lcd.print("k");
+    M5.Lcd.print("  Target = ");
+    M5.Lcd.print(R3_test_resistor);
+    M5.Lcd.println("k");
 
-    // Measure R3 / 2K
-    adc5 = ads2.readADC_SingleEnded(1); // U6_AIN1 - DUT_R3
-    U6_AIN1 = ads2.computeVolts(adc5); // U6_AIN1 - DUT_R3
-    DUT_R3 = ((U5_AIN0 * 2.00 ) / (U5_AIN0 - U6_AIN1)); // in kOhms
+    // R4
 
-    // Measure R5 / 4.53K
-    adc7 = ads2.readADC_SingleEnded(3); // U6_AIN3 - DUT_R5
-    U6_AIN3 = ads2.computeVolts(adc7); // U6_AIN3 - DUT_R5
-    DUT_R5 = ((U5_AIN0 * 4.53 ) / (U5_AIN0 - U6_AIN3)); // in kOhms
+    if ((abs((DUT_R4 - R4_test_resistor)/R4_test_resistor) < 0.01 ) or (abs((DUT_R4 - 124.000)/124.000) < 0.01 ))
+    {
+      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    } else {
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    }
+    M5.Lcd.print("R4 = ");
+    M5.Lcd.print(DUT_R4);
+    M5.Lcd.print("k");
+    M5.Lcd.print("  Target = ");
+    M5.Lcd.print(R4_test_resistor);
+    M5.Lcd.println("k");
 
-    // Measure R6 / 3K
-    adc1 = ads.readADC_SingleEnded(1); // U5_AIN1 - DUT_R6
-    U5_AIN1 = ads.computeVolts(adc1); // U5_AIN1 - DUT_R6
-    DUT_R6 = ((U5_AIN0 * 3.00 ) / (U5_AIN0 - U5_AIN1)); // in kOhms
+    // R5
+    if (abs((DUT_R5 - R5_test_resistor)/R5_test_resistor) < 0.01 ) 
+    {
+      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    } else {
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    }
+    M5.Lcd.print("R5 = ");
+    M5.Lcd.print(DUT_R5);
+    M5.Lcd.print("k");
+    M5.Lcd.print("  Target = ");
+    M5.Lcd.print(R5_test_resistor);
+    M5.Lcd.println("k");
 
-    // Determine if this is 6K (174K) or 8K (125K).
-    // This will tell us what value to set R1 to 
-    // If U6_AIN2 is close to 0.5* U5_AIN0, it's a 6K. 
-    // If U6_AIN2 is close to 0.41666667
+    // R6
+    if (abs((DUT_R6 - R6_test_resistor)/R6_test_resistor) < 0.01 ) 
+    {
+      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    } else {
+      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    }
+    M5.Lcd.print("R6 = ");
+    M5.Lcd.print(DUT_R6);
+    M5.Lcd.print("k");
+    M5.Lcd.print("  Target = ");
+    M5.Lcd.print(R6_test_resistor);
+    M5.Lcd.println("k");
 
-    // Report pass/fail results and CCW/CW results
 
-    
+
     // Wait for screen to clear, then Clear Screen and loop
-    delay(50); // We can't loop more than 128 samples per second (maybe 32 x 4 channels per ADC = 31.25mS)
-    M5.Lcd.clear();   // Clear the contents displayed on the screen
-    M5.Lcd.setCursor(0, 30);
+    delay(500); // We can't loop more than 128 samples per second (maybe 32 x 4 channels per ADC = 31.25mS)
+    // M5.Lcd.clear();   // Clear the contents displayed on the screen
+    // M5.Lcd.setCursor(0, 30);
 
   }
 }
