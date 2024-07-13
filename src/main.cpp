@@ -131,7 +131,7 @@ void setup() {
   digitalWrite (RELAY3_CONTROL, HIGH); // Turn On Relay3 / Resistors R4 and R6
 
   // Delay for Warm-up
-  delay(5000);
+  delay(1000);
 
 }
 
@@ -166,6 +166,7 @@ void loop() {
     float R4_desired_2 = 124.00; // in kOhms, this is the value we install on the ICs
     float R5_desired = 4.53; // in kOhms, this is the value we install on the ICs
     float R6_desired = 3.00; // in kOhms, this is the value we install on the ICs
+    
     float VIN_divider = 6.00235386; // VIN = VIN_divider * U5_AIN2 - actual measured value
     float VTEST_divider = 2.0011928; // VTEST = VTEST_divider * U5_AIN0 - actual measured value
     int model = 0; // Which model did we detect?  6=6k, 8=8k, 0 = not close to either
@@ -242,7 +243,19 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     } 
-    sprintf(R1_resistance_string," R1 =   %3.2fk  Target =  %3.2fk",R1_calculated, R1_desired);
+    if (adc6 > 29500) {
+      // Open
+      strcpy(R1_resistance_string, " R1 = Open");
+    } 
+    if (adc6 < 3277) 
+    {
+      // Shorted
+      strcpy(R1_resistance_string, " R1 = Short");
+    }
+    if ((3278 < adc6) and (adc6 < 29500)) {
+      // Somewhere between 0 and inf
+      sprintf(R1_resistance_string," R1 =   %3.2fk  Target =  %3.2fk",R1_calculated, R1_desired);
+    }
     M5.Lcd.println(R1_resistance_string);
 
     // R2
@@ -252,8 +265,21 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     }
-    sprintf(R2_resistance_string," R2 =     %1.2fk  Target =    %1.2fk",R2_calculated, R2_desired);
+    if (adc4 > 29500) {
+      // Open
+      strcpy(R2_resistance_string, " R2 = Open");
+    } 
+    if (adc4 < 3277) 
+    {
+      // Shorted
+      strcpy(R2_resistance_string, " R2 = Short");
+    }
+    if ((3278 < adc4) and (adc4 < 29500)) {
+      // Somewhere between 0 and inf
+      sprintf(R2_resistance_string," R2 =     %1.2fk  Target =    %1.2fk",R2_calculated, R2_desired);
+    }
     M5.Lcd.println(R2_resistance_string);
+
 
     // R3
     if (abs((R3_calculated - R3_desired)/R3_desired) < 0.01 ) 
@@ -262,8 +288,21 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     }
-    sprintf(R3_resistance_string," R3 =     %1.2fk  Target =    %1.2fk",R3_calculated, R3_desired);
+    if (adc5 > 29500) {
+      // Open
+      strcpy(R3_resistance_string, " R3 = Open");
+    } 
+    if (adc5 < 3277) 
+    {
+      // Shorted
+      strcpy(R3_resistance_string, " R3 = Short");
+    }
+    if ((3278 < adc5) and (adc5 < 29500)) {
+      // Somewhere between 0 and inf
+      sprintf(R3_resistance_string," R3 =     %1.2fk  Target =    %1.2fk",R3_calculated, R3_desired);
+    } 
     M5.Lcd.println(R3_resistance_string);
+
 
     // R4
     M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
@@ -282,7 +321,19 @@ void loop() {
       model_value = R4_desired_2;
       M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
     } 
-    sprintf(R4_resistance_string," R4 = %3.2fk  Target =%3.2fk",R4_calculated, model_value);
+    if (adc3 > 29500) {
+      // Open
+      strcpy(R4_resistance_string, " R4 = Open");
+    } 
+    if (adc3 < 3277) 
+    {
+      // Shorted
+      strcpy(R4_resistance_string, " R4 = Short");
+    }
+    if ((3278 < adc3) and (adc3 < 29500)) {
+      // Somewhere between 0 and inf
+      sprintf(R4_resistance_string," R4 = %3.2fk  Target =%3.2fk",R4_calculated, model_value);
+    } 
     M5.Lcd.println(R4_resistance_string);
 
     // R5
@@ -291,8 +342,19 @@ void loop() {
       M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    }if (adc7 > 29500) {
+      // Open
+      strcpy(R5_resistance_string, " R5 = Open");
+    } 
+    if (adc7 < 3277) 
+    {
+      // Shorted
+      strcpy(R5_resistance_string, " R5 = Short");
     }
-    sprintf(R5_resistance_string," R5 =     %1.2fk  Target =    %1.2fk",R5_calculated, R5_desired);
+    if ((3278 < adc7) and (adc7 < 29500)) {
+      // Somewhere between 0 and inf
+          sprintf(R5_resistance_string," R5 =     %1.2fk  Target =    %1.2fk",R5_calculated, R5_desired);
+    } 
     M5.Lcd.println(R5_resistance_string);
 
     // R6
@@ -302,7 +364,19 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     }
-    sprintf(R6_resistance_string," R6 =     %1.2fk  Target =    %1.2fk",R6_calculated, R6_desired);
+    if (adc1 > 29500) {
+      // Open
+      strcpy(R6_resistance_string, " R6 = Open");
+    } 
+    if (adc1 < 3277) 
+    {
+      // Shorted
+      strcpy(R6_resistance_string, " R6 = Short");
+    }
+    if ((3278 < adc1) and (adc1 < 29500)) {
+      // Somewhere between 0 and inf
+          sprintf(R6_resistance_string," R6 =     %1.2fk  Target =    %1.2fk",R6_calculated, R6_desired);
+    } 
     M5.Lcd.println(R6_resistance_string);
 
     // Wait for screen to clear, then Clear Screen and loop
