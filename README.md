@@ -36,14 +36,14 @@ U10 - MCP9802-5T Temp Sender: 0x4D
 
 ## ADC Inputs
 
-* U5_AIN0 - +5V_MEAS_U5_AIN0
-* U5_AIN1 - DUT_R6_MEAS_U5_AIN1
-* U5_AIN2 - +PWRIN_MEAS_U5_AIN2
-* U5_AIN3 - DUT_R4_MEAS_U5_AIN3
-* U6_AIN0 - DUT_R2_MEAS_U6_AIN0
-* U6_AIN1 - DUT_R3_MEAS_U6_AIN1
-* U6_AIN2 - DUT_R1_MEAS_U6_AIN2
-* U6_AIN3 - DUT_R5_MEAS_U6_AIN3
+* U5_AIN0 - +5V_MEAS_U5_AIN0 - Vtest
+* U5_AIN1 - DUT_R6_MEAS_U5_AIN1 - Voltage of the R6 divider pair
+* U5_AIN2 - +PWRIN_MEAS_U5_AIN2 - Vin
+* U5_AIN3 - DUT_R4_MEAS_U5_AIN3 - Voltage of the R4 divider pair
+* U6_AIN0 - DUT_R2_MEAS_U6_AIN0 - Voltage of the R2 divider pair
+* U6_AIN1 - DUT_R3_MEAS_U6_AIN1 - Voltage of the R3 divider pair
+* U6_AIN2 - DUT_R1_MEAS_U6_AIN2 - Voltage of the R1 divider pair
+* U6_AIN3 - DUT_R5_MEAS_U6_AIN3 - Voltage of the R5 divider pair
 
 ## Power
 
