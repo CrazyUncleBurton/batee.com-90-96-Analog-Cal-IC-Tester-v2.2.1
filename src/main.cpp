@@ -1,10 +1,14 @@
 /*
 
-  batee.com 90-96 Analog Cal IC Tester v2.2.1 Firmware
+  batee.com 90-96 Analog Cal IC Tester 
+  
+  Hardware: v2.2.1 
+  
+  Firmware: 1.0.0
 
   by Bryan A. "CrazyUncleBurton" Thompson
 
-  Last Updated 07/12/2024
+  Last Updated 07/13/2024
 
 */
 
@@ -127,7 +131,7 @@ void setup() {
   digitalWrite (RELAY3_CONTROL, HIGH); // Turn On Relay3 / Resistors R4 and R6
 
   // Delay for Warm-up
-  delay(1000);
+  delay(5000);
 
 }
 
@@ -226,7 +230,7 @@ void loop() {
     M5.Lcd.setCursor(0,30);
 
     // format environment output and print
-    sprintf(environment_string,"  Vtest: %1.3fV   Temp: %2.1fF", VTEST, TEMP);
+    sprintf(environment_string," Vtest = %1.3fV   Temp = %2.1fF", VTEST, TEMP);
     M5.Lcd.println(environment_string);
 
     // R1
@@ -238,7 +242,7 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     } 
-    sprintf(R1_resistance_string,"R1=%3.3fk Target =%3.3fk",R1_calculated, R1_desired);
+    sprintf(R1_resistance_string," R1 =   %3.2fk  Target =  %3.2fk",R1_calculated, R1_desired);
     M5.Lcd.println(R1_resistance_string);
 
     // R2
@@ -248,7 +252,7 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     }
-    sprintf(R2_resistance_string,"R2=%1.3fk Target =%1.3fk",R2_calculated, R2_desired);
+    sprintf(R2_resistance_string," R2 =     %1.2fk  Target =    %1.2fk",R2_calculated, R2_desired);
     M5.Lcd.println(R2_resistance_string);
 
     // R3
@@ -258,7 +262,7 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     }
-    sprintf(R3_resistance_string,"R3=%1.3fk Target =%1.3fk",R3_calculated, R3_desired);
+    sprintf(R3_resistance_string," R3 =     %1.2fk  Target =    %1.2fk",R3_calculated, R3_desired);
     M5.Lcd.println(R3_resistance_string);
 
     // R4
@@ -278,7 +282,7 @@ void loop() {
       model_value = R4_desired_2;
       M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
     } 
-    sprintf(R4_resistance_string,"R4=%3.3fk Target =%3.1fk",R4_calculated, model_value);
+    sprintf(R4_resistance_string," R4 = %3.2fk  Target =%3.2fk",R4_calculated, model_value);
     M5.Lcd.println(R4_resistance_string);
 
     // R5
@@ -288,7 +292,7 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     }
-    sprintf(R5_resistance_string,"R5=%1.3fk Target =%1.3fk",R5_calculated, R5_test_resistor);
+    sprintf(R5_resistance_string," R5 =     %1.2fk  Target =    %1.2fk",R5_calculated, R5_desired);
     M5.Lcd.println(R5_resistance_string);
 
     // R6
@@ -298,7 +302,7 @@ void loop() {
     } else {
       M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
     }
-    sprintf(R6_resistance_string,"R6=%1.3fk Target =%1.3fk",R6_calculated, R6_test_resistor);
+    sprintf(R6_resistance_string," R6 =     %1.2fk  Target =    %1.2fk",R6_calculated, R6_desired);
     M5.Lcd.println(R6_resistance_string);
 
     // Wait for screen to clear, then Clear Screen and loop
