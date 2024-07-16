@@ -8,7 +8,7 @@
 
   by Bryan A. "CrazyUncleBurton" Thompson
 
-  Last Updated 07/13/2024
+  Last Updated 07/16/2024
 
 */
 
@@ -153,11 +153,15 @@ void loop() {
     char R4_resistance_string[16];
     char R5_resistance_string[16];
     char R6_resistance_string[16];
-    float R1_test_resistor = 96.000; // in kOhms as measured from ground to the DUT Socket pin 10
+    float R1_test_resistor = 97.050; // in kOhms as measured from ground to the DUT Socket pin 10
+    // for some reason, R1 was measuring high by about 1K.  So I changed the test resistor from 
+    // its measured value of 96.3k to 97.050k to correct the output test result..  
     float R2_test_resistor = 4.017; // in kOhms as measured from ground to the DUT Socket pin 13
     float R3_test_resistor = 2.001; // in kOhms as measured from ground to the DUT Socket pin 11
-    float R4_test_resistor = 174.200; // in kOhms as measured from ground to the DUT Socket pin 0
-    float R5_test_resistor = 4.518; // in kOhms as measured from ground to the DUT Socket pin 4
+    float R4_test_resistor = 175.500; // in kOhms as measured from ground to the DUT Socket pin 4
+    // This measures about 1.5K low with correct value of test resistor.  I changed this value to 
+    // 175.5k to correct the output test result.
+    float R5_test_resistor = 4.518; // in kOhms as measured from ground to the DUT Socket pin 9
     float R6_test_resistor = 3.001; // in kOhms as measured from ground to the DUT Socket pin 7
     float R1_desired = 96.00; // in kOhms, this is the value we install on the ICs
     float R2_desired = 4.02; // in kOhms, this is the value we install on the ICs
